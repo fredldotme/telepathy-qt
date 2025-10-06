@@ -1,6 +1,6 @@
 project(TelepathyQt)
 
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.20)
 
 if(${CMAKE_VERSION} VERSION_LESS 3.15)
     cmake_policy(VERSION ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION})
@@ -15,8 +15,8 @@ endif()
 #   make the release, tag it
 #   set nano_version to 1
 set(TP_QT_MAJOR_VERSION 0)
-set(TP_QT_MINOR_VERSION 9)
-set(TP_QT_MICRO_VERSION 8)
+set(TP_QT_MINOR_VERSION 10)
+set(TP_QT_MICRO_VERSION 0)
 set(TP_QT_NANO_VERSION  0)
 
 set(PACKAGE_NAME telepathy-qt)
@@ -68,17 +68,17 @@ include(FeatureSummary)
 # external dependencies
 
 # Required dependencies
-set(QT_VERSION_MAJOR 5)
-SET(QT_VERSION_PC 5)
+set(QT_VERSION_MAJOR 6)
+SET(QT_VERSION_PC 6)
 set(QT_COMPONENTS Core DBus Network Xml)
 
 if(ENABLE_TESTS)
     list(APPEND QT_COMPONENTS Test)
 endif()
 
-set(QT_MIN_VERSION "5.6.0")
-set(QT_MAX_VERSION "6.0.0")
-find_package(Qt5 ${QT_MIN_VERSION} REQUIRED COMPONENTS ${QT_COMPONENTS})
+set(QT_MIN_VERSION "6.4.0")
+set(QT_MAX_VERSION "7.0.0")
+find_package(Qt6 ${QT_MIN_VERSION} REQUIRED COMPONENTS ${QT_COMPONENTS})
 
 set(TP_QT_EXECUTABLE_LINKER_FLAGS "-fPIE")
 set(TP_QT_LIBRARY_LINKER_FLAGS "-fPIC")
@@ -118,7 +118,7 @@ set(CMAKE_REQUIRED_DEFINITIONS "")
 # set the flags (-fPIE) here so that CHECK_CXX_SOURCE_COMPILES works properly if qt5 was built with
 # -reduce-locations
 set(CMAKE_REQUIRED_FLAGS "${TP_QT_EXECUTABLE_LINKER_FLAGS}")
-set(CMAKE_REQUIRED_LIBRARIES Qt5::Core)
+set(CMAKE_REQUIRED_LIBRARIES Qt6::Core)
 
 CHECK_CXX_SOURCE_COMPILES("
 #include <QtCore/QtGlobal>

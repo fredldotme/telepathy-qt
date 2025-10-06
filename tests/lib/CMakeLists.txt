@@ -23,9 +23,9 @@ endforeach()
 
 add_library(tp-qt-tests ${tp_qt_tests_SRCS})
 target_link_libraries(tp-qt-tests
-    Qt5::Core
-    Qt5::DBus
-    Qt5::Test
+    Qt6::Core
+    Qt6::DBus
+    Qt6::Test
     telepathy-qt${QT_VERSION_MAJOR}
 )
 

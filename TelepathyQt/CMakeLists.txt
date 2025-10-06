@@ -785,13 +785,13 @@ endforeach()
 
 # Link
 target_link_libraries(telepathy-qt${QT_VERSION_MAJOR} PUBLIC
-    Qt5::Core
-    Qt5::DBus
-    Qt5::Network
+    Qt6::Core
+    Qt6::DBus
+    Qt6::Network
 )
 
 target_link_libraries(telepathy-qt${QT_VERSION_MAJOR} PRIVATE
-    Qt5::Xml
+    Qt6::Xml
 )
 
 target_link_libraries(telepathy-qt${QT_VERSION_MAJOR} PUBLIC
@@ -806,10 +806,10 @@ target_include_directories(telepathy-qt${QT_VERSION_MAJOR} PUBLIC
 
 # Link - Library used by tests to test some unexported functionality
 target_link_libraries(telepathy-qt-test-backdoors PUBLIC
-    Qt5::Core
-    Qt5::DBus
-    Qt5::Network
-    Qt5::Xml
+    Qt6::Core
+    Qt6::DBus
+    Qt6::Network
+    Qt6::Xml
 )
 
 target_link_libraries(telepathy-qt-test-backdoors PUBLIC
@@ -1013,8 +1013,8 @@ if(ENABLE_SERVICE_SUPPORT)
 
     # Link
     target_link_libraries(telepathy-qt${QT_VERSION_MAJOR}-service PUBLIC
-        Qt5::Core
-        Qt5::DBus
+        Qt6::Core
+        Qt6::DBus
         telepathy-qt${QT_VERSION_MAJOR})
 
     # Set the correct version number

@@ -178,7 +178,11 @@ ENDFUNCTION ()
 function(TPQT_GENERATE_MOC_I infile outfile)
     qt_get_moc_flags(moc_flags)
     get_filename_component(abs_infile ${infile} ABSOLUTE)
-    qt_create_moc_command(${abs_infile} ${outfile} "${moc_flags}" "-i")
+    #_qt_internal_create_moc_command(${abs_infile} ${outfile} "${moc_flags}" "-i" "${moc_target}" "" "")
+    add_custom_command(OUTPUT ${outfile}
+                       COMMAND Qt6::moc
+                       ARGS ${moc_flags} -i -o ${outfile} ${infile}
+                       DEPENDS ${infile})
     set_source_files_properties(${outfile} PROPERTIES SKIP_AUTOMOC TRUE)  # dont run automoc on this file
 endfunction()
 
