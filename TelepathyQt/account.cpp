@@ -49,7 +49,7 @@
 #include <TelepathyQt/Debug>
 
 #include <QQueue>
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QSharedPointer>
 #include <QTimer>
 #include <QPointer>
@@ -635,27 +635,30 @@ Account::Private::Private(Account *parent, const ConnectionFactoryConstPtr &conn
 {
     // FIXME: QRegExp probably isn't the most efficient possible way to parse
     //        this :-)
-    QRegExp rx(QLatin1String("^") + TP_QT_ACCOUNT_OBJECT_PATH_BASE +
-                QLatin1String("/([_A-Za-z][_A-Za-z0-9]*)"  // cap(1) is the CM
-                "/([_A-Za-z][_A-Za-z0-9]*)"  // cap(2) is the protocol
-                "/([_A-Za-z][_A-Za-z0-9]*)"  // account-specific part
-                ));
+    QRegularExpression rx(QLatin1String("^") + TP_QT_ACCOUNT_OBJECT_PATH_BASE +
+                          QLatin1String("/([_A-Za-z][_A-Za-z0-9]*)"  // cap(1) is the CM
+                          "/([_A-Za-z][_A-Za-z0-9]*)"  // cap(2) is the protocol
+                          "/([_A-Za-z][_A-Za-z0-9]*)"  // account-specific part
+                          ));
 
-    if (rx.exactMatch(parent->objectPath())) {
-        cmName = rx.cap(1);
-        protocolName = rx.cap(2).replace(QLatin1Char('_'), QLatin1Char('-'));
+    QRegularExpressionMatch match = rx.match(parent->objectPath());
+    if (match.hasMatch()) {
+        cmName = match.captured(1);
+        protocolName = match.captured(2).replace(QLatin1Char('_'), QLatin1Char('-'));
     } else {
         warning() << "Account object path is not spec-compliant, "
             "trying again with a different account-specific part check";
 
-        rx = QRegExp(QLatin1String("^") + TP_QT_ACCOUNT_OBJECT_PATH_BASE +
-                    QLatin1String("/([_A-Za-z][_A-Za-z0-9]*)"  // cap(1) is the CM
-                    "/([_A-Za-z][_A-Za-z0-9]*)"  // cap(2) is the protocol
-                    "/([_A-Za-z0-9]*)"  // account-specific part
-                    ));
-        if (rx.exactMatch(parent->objectPath())) {
-            cmName = rx.cap(1);
-            protocolName = rx.cap(2).replace(QLatin1Char('_'), QLatin1Char('-'));
+        rx = QRegularExpression(QLatin1String("^") + TP_QT_ACCOUNT_OBJECT_PATH_BASE +
+                                QLatin1String("/([_A-Za-z][_A-Za-z0-9]*)"  // cap(1) is the CM
+                                "/([_A-Za-z][_A-Za-z0-9]*)"  // cap(2) is the protocol
+                                "/([_A-Za-z0-9]*)"  // account-specific part
+                                ));
+        match = rx.match(parent->objectPath());
+
+        if (match.hasMatch()) {
+            cmName = match.captured(1);
+            protocolName = match.captured(2).replace(QLatin1Char('_'), QLatin1Char('-'));
         } else {
             warning() << "Not a valid Account object path:" <<
                 parent->objectPath();

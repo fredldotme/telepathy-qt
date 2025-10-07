@@ -299,27 +299,30 @@ Connection::Private::Private(Connection *parent,
 
     // FIXME: QRegExp probably isn't the most efficient possible way to parse
     //        this :-)
-    QRegExp rx(QLatin1String("^") + TP_QT_CONNECTION_OBJECT_PATH_BASE + QLatin1String(
-                "([_A-Za-z][_A-Za-z0-9]*)"  // cap(1) is the CM
-                "/([_A-Za-z][_A-Za-z0-9]*)"  // cap(2) is the protocol
-                "/([_A-Za-z][_A-Za-z0-9]*)"  // account-specific part
-                ));
+    QRegularExpression rx(QLatin1String("^") + TP_QT_CONNECTION_OBJECT_PATH_BASE + QLatin1String(
+                          "([_A-Za-z][_A-Za-z0-9]*)"  // cap(1) is the CM
+                          "/([_A-Za-z][_A-Za-z0-9]*)"  // cap(2) is the protocol
+                          "/([_A-Za-z][_A-Za-z0-9]*)"  // account-specific part
+                          ));
+    QRegularExpressionMatch match = rx.match(parent->objectPath());
 
-    if (rx.exactMatch(parent->objectPath())) {
-        cmName = rx.cap(1);
-        protocolName = rx.cap(2);
+    if (match.hasMatch()) {
+        cmName = match.captured(1);
+        protocolName = match.captured(2);
     } else {
         warning() << "Connection object path is not spec-compliant, "
             "trying again with a different account-specific part check";
 
-        rx = QRegExp(QLatin1String("^") + TP_QT_CONNECTION_OBJECT_PATH_BASE + QLatin1String(
-                    "([_A-Za-z][_A-Za-z0-9]*)"  // cap(1) is the CM
-                    "/([_A-Za-z][_A-Za-z0-9]*)"  // cap(2) is the protocol
-                    "/([_A-Za-z0-9]*)"  // account-specific part
-                    ));
-        if (rx.exactMatch(parent->objectPath())) {
-            cmName = rx.cap(1);
-            protocolName = rx.cap(2);
+        rx = QRegularExpression(QLatin1String("^") + TP_QT_CONNECTION_OBJECT_PATH_BASE + QLatin1String(
+                                "([_A-Za-z][_A-Za-z0-9]*)"  // cap(1) is the CM
+                                "/([_A-Za-z][_A-Za-z0-9]*)"  // cap(2) is the protocol
+                                "/([_A-Za-z0-9]*)"  // account-specific part
+                                ));
+        match = rx.match(parent->objectPath());
+
+        if (match.hasMatch()) {
+            cmName = match.captured(1);
+            protocolName = match.captured(2);
         } else {
             warning() << "Not a valid Connection object path:" <<
                 parent->objectPath();
@@ -353,7 +356,12 @@ Connection::Private::~Private()
                 if (!type.toRelease.empty()) {
                     debug() << " Was going to release" <<
                         type.toRelease.size() << "handles, doing that now";
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
                     baseInterface->ReleaseHandles(handleType, type.toRelease.toList());
+#else
+                    QList<uint> releaseList = QList<uint>(type.toRelease.begin(), type.toRelease.end());
+                    baseInterface->ReleaseHandles(handleType, releaseList);
+#endif
                 }
             }
 

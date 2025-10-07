@@ -225,13 +225,23 @@ public:
 
     inline QSet<uint> toSet() const
     {
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
         return toList().toSet();
+#else
+        QList<uint> list = toList();
+        return QSet<uint>(list.begin(), list.end());
+#endif
     }
 
 #ifndef QT_NO_STL
     inline std::list<uint> toStdList() const
     {
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
         return toList().toStdList();
+#else
+        QList<uint> list = toList();
+        return std::list<uint>(list.begin(), list.end());
+#endif
     }
 #endif
 

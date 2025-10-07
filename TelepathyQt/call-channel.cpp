@@ -318,8 +318,16 @@ void CallChannel::Private::processCallMembersChanged()
         connection->lowlevel()->injectContactIds(currentCallMembersChangedInfo->identifiers);
 
         ContactManagerPtr contactManager = connection->contactManager();
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
         PendingContacts *contacts = contactManager->contactsForHandles(
                 pendingCallMembers.toList());
+#else
+        QList<uint> pendingCallMemberList =
+          QList<uint>(pendingCallMembers.begin(),
+                      pendingCallMembers.end());
+        PendingContacts *contacts = contactManager->contactsForHandles(
+                pendingCallMemberList);
+#endif
         parent->connect(contacts,
                 SIGNAL(finished(Tp::PendingOperation*)),
                 SLOT(gotCallMembersContacts(Tp::PendingOperation*)));
@@ -505,7 +513,12 @@ Contacts CallChannel::remoteMembers() const
         return Contacts();
     }
 
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     return mPriv->callMembersContacts.values().toSet();
+#else
+    QList<ContactPtr> contacts = mPriv->callMembersContacts.values();
+    return Contacts(contacts.begin(), contacts.end());
+#endif
 }
 
 /**
@@ -521,11 +534,11 @@ CallMemberFlags CallChannel::remoteMemberFlags(const ContactPtr &member) const
 {
     if (!isReady(FeatureCallMembers)) {
         warning() << "CallChannel::remoteMemberFlags() used with FeatureCallMembers not ready";
-        return (CallMemberFlags) nullptr;
+        return (CallMemberFlags) 0;
     }
 
     if (!member) {
-        return (CallMemberFlags) nullptr;
+        return (CallMemberFlags) 0;
     }
 
     for (CallMemberMap::const_iterator i = mPriv->callMembers.constBegin();
@@ -538,7 +551,7 @@ CallMemberFlags CallChannel::remoteMemberFlags(const ContactPtr &member) const
         }
     }
 
-    return (CallMemberFlags) nullptr;
+    return (CallMemberFlags) 0;
 }
 
 /**
@@ -1008,8 +1021,16 @@ void CallChannel::gotCallMembersContacts(PendingOperation *op)
         }
 
         if (!removed.isEmpty()) {
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
             emit remoteMembersRemoved(removed.values().toSet(),
                     mPriv->currentCallMembersChangedInfo->reason);
+#else
+            QSet<ContactPtr> contacts =
+              QSet<ContactPtr>(removed.values().begin(),
+                               removed.values().end());
+            emit remoteMembersRemoved(contacts,
+                    mPriv->currentCallMembersChangedInfo->reason);
+#endif
         }
     }
 

@@ -169,8 +169,17 @@ void CallStream::Private::processRemoteMembersChanged()
         connection->lowlevel()->injectContactIds(currentRemoteMembersChangedInfo->identifiers);
 
         ContactManagerPtr contactManager = connection->contactManager();
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
         PendingContacts *contacts = contactManager->contactsForHandles(
                 pendingRemoteMembers.toList());
+#else
+        QList<uint> pendingRemoteMemberList =
+          QList<uint>(pendingRemoteMembers.begin(),
+                      pendingRemoteMembers.end());
+        PendingContacts *contacts = contactManager->contactsForHandles(
+                pendingRemoteMemberList);
+#endif
+
         parent->connect(contacts,
                 SIGNAL(finished(Tp::PendingOperation*)),
                 SLOT(gotRemoteMembersContacts(Tp::PendingOperation*)));

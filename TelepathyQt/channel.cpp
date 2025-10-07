@@ -832,9 +832,18 @@ void Channel::Private::buildContacts()
     buildingContacts = true;
 
     ContactManagerPtr manager = connection->contactManager();
+
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     UIntList toBuild = QSet<uint>(pendingGroupMembers +
             pendingGroupLocalPendingMembers +
             pendingGroupRemotePendingMembers).toList();
+#else
+    QSet<uint> members =
+           (pendingGroupMembers +
+            pendingGroupLocalPendingMembers +
+            pendingGroupRemotePendingMembers);
+    UIntList toBuild = UIntList(members.begin(), members.end());
+#endif
 
     if (currentGroupMembersChangedInfo &&
             currentGroupMembersChangedInfo->actor != 0) {
@@ -2374,7 +2383,14 @@ Contacts Channel::groupContacts(bool includeSelfContact) const
         warning() << "Channel::groupMembers() used channel not ready";
     }
 
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     Contacts ret = mPriv->groupContacts.values().toSet();
+#else
+    Contacts ret = Contacts(
+      mPriv->groupContacts.values().begin(),
+      mPriv->groupContacts.values().end());
+#endif
+
     if (!includeSelfContact) {
         ret.remove(groupSelfContact());
     }
@@ -2405,7 +2421,14 @@ Contacts Channel::groupLocalPendingContacts(bool includeSelfContact) const
         warning() << "Channel::groupLocalPendingContacts() used with no group interface";
     }
 
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     Contacts ret = mPriv->groupLocalPendingContacts.values().toSet();
+#else
+    Contacts ret = Contacts(
+      mPriv->groupLocalPendingContacts.values().begin(),
+      mPriv->groupLocalPendingContacts.values().end());
+#endif
+
     if (!includeSelfContact) {
         ret.remove(groupSelfContact());
     }
@@ -2437,7 +2460,14 @@ Contacts Channel::groupRemotePendingContacts(bool includeSelfContact) const
             "group interface";
     }
 
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     Contacts ret = mPriv->groupRemotePendingContacts.values().toSet();
+#else
+    Contacts ret = Contacts(
+      mPriv->groupRemotePendingContacts.values().begin(),
+      mPriv->groupRemotePendingContacts.values().end());
+#endif
+
     if (!includeSelfContact) {
         ret.remove(groupSelfContact());
     }

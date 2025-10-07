@@ -140,6 +140,12 @@ ENDMACRO ()
 
 # helper function to set up a moc rule
 FUNCTION (TPQT_CREATE_MOC_COMMAND_TARGET_DEPS infile outfile moc_flags moc_options)
+  IF(ENABLE_QT6)
+      SET(MOC_BIN "Qt6::moc")
+  ELSE()
+      SET(MOC_BIN "${QT_MOC_EXECUTABLE}")
+  ENDIF()
+
   # For Windows, create a parameters file to work around command line length limit
   GET_FILENAME_COMPONENT(_moc_outfile_name "${outfile}" NAME)
   IF (WIN32)
@@ -159,13 +165,13 @@ FUNCTION (TPQT_CREATE_MOC_COMMAND_TARGET_DEPS infile outfile moc_flags moc_optio
       FILE (APPEND ${_moc_parameters_file} "${arg}\n")
     ENDFOREACH()
     ADD_CUSTOM_COMMAND(OUTPUT ${outfile}
-                       COMMAND ${QT_MOC_EXECUTABLE} @${_moc_outfile_name}_parameters
+                       COMMAND ${MOC_BIN} @${_moc_outfile_name}_parameters
                        DEPENDS ${infile}
                        ${_moc_working_dir}
                        VERBATIM)
   ELSE ()
     ADD_CUSTOM_COMMAND(OUTPUT ${outfile}
-                       COMMAND ${QT_MOC_EXECUTABLE}
+                       COMMAND ${MOC_BIN}
                        ARGS ${moc_flags} ${moc_options} -o ${outfile} ${infile}
                        DEPENDS ${infile})
   ENDIF ()

@@ -45,6 +45,8 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+# Add an option for compiling against Qt6
+option(ENABLE_QT6 "Build against Qt6" FALSE)
 # Add an option for compiling tp-qt-service
 option(ENABLE_SERVICE_SUPPORT "Enable compilation of service side bindings for Telepathy-Qt" TRUE)
 # Add an option to select type of service library
