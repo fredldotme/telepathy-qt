@@ -842,7 +842,7 @@ void Channel::Private::buildContacts()
            (pendingGroupMembers +
             pendingGroupLocalPendingMembers +
             pendingGroupRemotePendingMembers);
-    UIntList toBuild = UIntList(members.begin(), members.end());
+    UIntList toBuild = QList<uint>(members.begin(), members.end());
 #endif
 
     if (currentGroupMembersChangedInfo &&
@@ -3153,12 +3153,12 @@ void Channel::gotContacts(PendingOperation *op)
 void Channel::onGroupFlagsChanged(uint added, uint removed)
 {
     debug().nospace() << "Got Channel.Interface.Group::GroupFlagsChanged(" <<
-        hex << added << ", " << removed << ")";
+        /*hex <<*/ added << ", " << removed << ")";
 
     added &= ~(mPriv->groupFlags);
     removed &= mPriv->groupFlags;
 
-    debug().nospace() << "Arguments after filtering (" << hex << added <<
+    debug().nospace() << "Arguments after filtering (" /*<< hex */ << added <<
         ", " << removed << ")";
 
     uint groupFlags = mPriv->groupFlags;
@@ -3454,7 +3454,12 @@ void Channel::gotConferenceInitialInviteeContacts(PendingOperation *op)
     PendingContacts *pending = qobject_cast<PendingContacts *>(op);
 
     if (pending->isValid()) {
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
         mPriv->conferenceInitialInviteeContacts = pending->contacts().toSet();
+#else
+        mPriv->conferenceInitialInviteeContacts = QSet<ContactPtr>(pending->contacts().begin(),
+                                                                   pending->contacts().end());
+#endif
     } else {
         warning().nospace() << "Getting conference initial invitee contacts "
             "failed with " << pending->errorName() << ":" <<

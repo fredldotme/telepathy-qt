@@ -173,8 +173,15 @@ void ContactManager::PendingRefreshContactInfo::refreshInfo()
     Client::ConnectionInterfaceContactInfoInterface *contactInfoInterface =
         mConn->interface<Client::ConnectionInterfaceContactInfoInterface>();
     Q_ASSERT(contactInfoInterface);
+
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+    QList<uint> requestList = mToRequest.toList();
+#else
+    QList<uint> requestList = QList<uint>(mToRequest.begin(), mToRequest.end());
+#endif
+
     PendingVoid *nested = new PendingVoid(
-            contactInfoInterface->RefreshContactInfo(mToRequest.toList()),
+            contactInfoInterface->RefreshContactInfo(requestList),
             mConn);
     connect(nested,
             SIGNAL(finished(Tp::PendingOperation*)),
@@ -1042,9 +1049,15 @@ PendingContacts *ContactManager::contactsForHandles(const UIntList &handles,
 
     QSet<QString> interfaces = mPriv->interfacesForFeatures(missingFeatures);
 
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+    QStringList interfaceList = interfaces.toList();
+#else
+    QStringList interfaceList = QStringList(interfaces.begin(), interfaces.end());
+#endif
+
     PendingContacts *contacts =
         new PendingContacts(ContactManagerPtr(this), handles, features, missingFeatures,
-                interfaces.toList(), satisfyingContacts, otherContacts);
+                interfaceList, satisfyingContacts, otherContacts);
     return contacts;
 }
 
@@ -1117,8 +1130,14 @@ PendingContacts *ContactManager::contactsForVCardAddresses(const QString &vcardF
     Features realFeatures = mPriv->realFeatures(features);
     QSet<QString> interfaces = mPriv->interfacesForFeatures(realFeatures);
 
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+    QStringList interfaceList = interfaces.toList();
+#else
+    QStringList interfaceList = QStringList(interfaces.begin(), interfaces.end());
+#endif
+
     PendingContacts *contacts = new PendingContacts(ContactManagerPtr(this), vcardField,
-            vcardAddresses, realFeatures, interfaces.toList());
+            vcardAddresses, realFeatures, interfaceList);
     return contacts;
 }
 
@@ -1153,8 +1172,14 @@ PendingContacts *ContactManager::contactsForUris(const QStringList &uris,
     Features realFeatures = mPriv->realFeatures(features);
     QSet<QString> interfaces = mPriv->interfacesForFeatures(realFeatures);
 
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+    QStringList interfaceList = interfaces.toList();
+#else
+    QStringList interfaceList = QStringList(interfaces.begin(), interfaces.end());
+#endif
+
     PendingContacts *contacts = new PendingContacts(ContactManagerPtr(this), uris,
-            PendingContacts::ForUris, realFeatures, interfaces.toList());
+            PendingContacts::ForUris, realFeatures, interfaceList);
     return contacts;
 }
 
@@ -1216,7 +1241,13 @@ void ContactManager::requestContactAvatars(const QList<ContactPtr> &contacts)
         QTimer::singleShot(0, this, SLOT(doRequestAvatars()));
     }
 
-    mPriv->requestAvatarsQueue.unite(contacts.toSet());
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+    QSet<ContactPtr> set = contacts.toSet();
+#else
+    QSet<ContactPtr> set = QSet<ContactPtr>(contacts.begin(), contacts.end());
+#endif
+
+    mPriv->requestAvatarsQueue.unite(set);
 }
 
 /**

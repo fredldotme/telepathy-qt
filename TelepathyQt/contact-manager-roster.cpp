@@ -228,7 +228,11 @@ QStringList ContactManager::Roster::allKnownGroups() const
         return contactListGroupChannels.keys();
     }
 
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     return cachedAllKnownGroups.toList();
+#else
+    return QStringList(cachedAllKnownGroups.begin(), cachedAllKnownGroups.end());
+#endif
 }
 
 PendingOperation *ContactManager::Roster::addGroup(const QString &group)
@@ -1338,13 +1342,27 @@ void ContactManager::Roster::gotContactListGroupsProperties(PendingOperation *op
 
     QVariantMap props = pvm->result();
 
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     cachedAllKnownGroups = qdbus_cast<QStringList>(props[QLatin1String("Groups")]).toSet();
+#else
+    const auto groups = qdbus_cast<QStringList>(props[QLatin1String("Groups")]);
+    cachedAllKnownGroups = QSet<QString>(groups.begin(), groups.end());
+#endif
     contactListGroupPropertiesReceived = true;
 
     processingContactListChanges = true;
+
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     PendingContacts *pc = contactManager->upgradeContacts(
             contactManager->allKnownContacts().toList(),
             Contact::FeatureRosterGroups);
+#else
+    auto contacts = QList<Tp::SharedPtr<Tp::Contact> > (
+            contactManager->allKnownContacts().begin(),
+            contactManager->allKnownContacts().end());
+    PendingContacts *pc = contactManager->upgradeContacts(
+            contacts, Contact::FeatureRosterGroups);
+#endif
     connect(pc,
             SIGNAL(finished(Tp::PendingOperation*)),
             SLOT(onContactListContactsUpgraded(Tp::PendingOperation*)));
@@ -1692,9 +1710,15 @@ void ContactManager::Roster::introspectContactListContacts()
         }
     }
     interfaces.insert(TP_QT_IFACE_CONNECTION_INTERFACE_CONTACT_LIST);
-
+    
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     QDBusPendingCallWatcher *watcher = new QDBusPendingCallWatcher(
             iface->GetContactListAttributes(interfaces.toList(), true), contactManager);
+#else
+    QStringList interfaceList = QStringList(interfaces.begin(), interfaces.end());
+    QDBusPendingCallWatcher *watcher = new QDBusPendingCallWatcher(
+            iface->GetContactListAttributes(interfaceList, true), contactManager);
+#endif
     connect(watcher,
             SIGNAL(finished(QDBusPendingCallWatcher*)),
             SLOT(gotContactListContacts(QDBusPendingCallWatcher*)));
@@ -2172,9 +2196,16 @@ ContactManager::Roster::RemoveGroupOp::RemoveGroupOp(const ChannelPtr &channel)
 {
     Contacts contacts = channel->groupContacts();
     if (!contacts.isEmpty()) {
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
         connect(channel->groupRemoveContacts(contacts.toList()),
                 SIGNAL(finished(Tp::PendingOperation*)),
                 SLOT(onContactsRemoved(Tp::PendingOperation*)));
+#else
+        QList<ContactPtr> contactList = QList<ContactPtr>(contacts.begin(), contacts.end());
+        connect(channel->groupRemoveContacts(contactList),
+                SIGNAL(finished(Tp::PendingOperation*)),
+                SLOT(onContactsRemoved(Tp::PendingOperation*)));
+#endif
     } else {
         connect(channel->requestClose(),
                 SIGNAL(finished(Tp::PendingOperation*)),

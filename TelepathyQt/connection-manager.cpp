@@ -83,7 +83,12 @@ void ConnectionManager::Private::PendingNames::continueProcessing()
     }
     else {
         debug() << "Success: list" << mResult;
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
         setResult(mResult.toList());
+#else
+        QList<QString> resultList = QList<QString>(mResult.begin(), mResult.end());
+        setResult(resultList);
+#endif
         setFinished();
     }
 }

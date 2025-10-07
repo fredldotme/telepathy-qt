@@ -121,7 +121,11 @@ QStringList ContactCapabilities::dbusTubeServices() const
         }
     }
 
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     return ret.toList();
+#else
+    return QStringList(ret.begin(), ret.end());
+#endif
 }
 
 /**
@@ -162,7 +166,11 @@ QStringList ContactCapabilities::streamTubeServices() const
         }
     }
 
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     return ret.toList();
+#else
+    return QStringList(ret.begin(), ret.end());
+#endif
 }
 
 } // Tp

@@ -70,17 +70,27 @@ include(FeatureSummary)
 # external dependencies
 
 # Required dependencies
-set(QT_VERSION_MAJOR 6)
-SET(QT_VERSION_PC 6)
 set(QT_COMPONENTS Core DBus Network Xml)
+
+if(ENABLE_QT6)
+    set(QT_VERSION_MAJOR 6)
+    set(QT_VERSION_PC 6)
+    set(QT_MIN_VERSION "6.4.0")
+    set(QT_MAX_VERSION "7.0.0")
+    
+    list(APPEND QT_COMPONENTS Core5Compat)
+else()
+    set(QT_VERSION_MAJOR 5)
+    set(QT_VERSION_PC 5)
+    set(QT_MIN_VERSION "6.4.0")
+    set(QT_MAX_VERSION "7.0.0")
+endif()
 
 if(ENABLE_TESTS)
     list(APPEND QT_COMPONENTS Test)
 endif()
 
-set(QT_MIN_VERSION "6.4.0")
-set(QT_MAX_VERSION "7.0.0")
-find_package(Qt6 ${QT_MIN_VERSION} REQUIRED COMPONENTS ${QT_COMPONENTS})
+find_package(Qt${QT_VERSION_MAJOR} ${QT_MIN_VERSION} REQUIRED COMPONENTS ${QT_COMPONENTS})
 
 set(TP_QT_EXECUTABLE_LINKER_FLAGS "-fPIE")
 set(TP_QT_LIBRARY_LINKER_FLAGS "-fPIC")
