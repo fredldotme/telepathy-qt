@@ -269,7 +269,14 @@ bool CallStream::canRequestReceiving() const
  */
 Contacts CallStream::remoteMembers() const
 {
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     return mPriv->remoteMembersContacts.values().toSet();
+#else
+    Contacts contacts = Contacts(
+      mPriv->remoteMembersContacts.values().begin(),
+      mPriv->remoteMembersContacts.values().end());
+    return contacts;
+#endif
 }
 
 /**
@@ -440,7 +447,12 @@ void CallStream::gotRemoteMembersContacts(PendingOperation *op)
         }
 
         if (!removed.isEmpty()) {
-            emit remoteMembersRemoved(removed.values().toSet(),
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+            Contacts members = removed.values().toSet();
+#else
+            Contacts members = Contacts(removed.values().begin(), removed.values().end());
+#endif
+            emit remoteMembersRemoved(members,
                     mPriv->currentRemoteMembersChangedInfo->reason);
         }
     }
